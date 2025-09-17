@@ -1,7 +1,7 @@
 {
   lib,
   buildGoModule,
-  fetchFromGitHub
+  fetchFromGitHub,
 }:
 
 buildGoModule rec {
@@ -24,6 +24,10 @@ buildGoModule rec {
     "-w"
     "-X 'qbit-exp/app.version=v${version}'"
   ];
+
+  postInstall = ''
+    mv $out/bin/qbit-exp $out/bin/prometheus-qbittorrent-exporter
+  '';
 
   meta = {
     description = "A fast and lightweight prometheus exporter for qBittorrent";
