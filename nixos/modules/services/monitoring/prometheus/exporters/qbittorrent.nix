@@ -72,7 +72,7 @@ in
 
   serviceOpts = {
     serviceConfig = {
-      ExecStart = getExe pkgs.prometheus-qbittorrent-exporter;
+      ExecStart = getExe cfg.package;
       EnvironmentFile = cfg.environmentFile;
     };
     environment = {
