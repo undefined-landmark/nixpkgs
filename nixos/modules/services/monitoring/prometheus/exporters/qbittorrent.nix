@@ -34,7 +34,7 @@ in
       '';
     };
 
-    user = mkOption {
+    username = mkOption {
       type = nullOr str;
       default = "admin";
       description = ''
