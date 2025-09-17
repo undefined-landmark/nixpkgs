@@ -1393,6 +1393,12 @@ let
     qbittorrent = {
       exporterConfig = {
         enable = true;
+        port = 8091;
+        user = "user";
+        url = "http://localhost:8088";
+        environment = {
+          ENABLE_TRACKER = "false";
+        };
         # Don't do this in practice, it will put the password in the nix store.
         environmentFile = pkgs.writeText "qbit.env" ''
           QBITTORRENT_PASSWORD=adminadmin
@@ -1401,9 +1407,11 @@ let
       metricProvider = {
         services.qbittorrent = {
           enable = true;
+          webuiPort = 8088;
           serverConfig = {
             Preferences = {
               WebUI = {
+                Username = "user";
                 # password: "adminadmin" as ByteArray
                 Password_PBKDF2 = "@ByteArray(6DIf26VOpTCYbgNiO6DAFQ==:e6241eaAWGzRotQZvVA5/up9fj5wwSAThLgXI2lVMsYTu1StUgX9MgmElU3Sa/M8fs+zqwZv9URiUOObjqJGNw==)";
               };
@@ -1411,13 +1419,14 @@ let
           };
         };
       };
-      exporterTest = ''
-        wait_for_unit("qbittorrent.service")
-        wait_for_unit("prometheus-qbittorrent-exporter.service")
-        wait_for_open_port(8080)
-        wait_for_open_port(8090)
-        execute("curl -sSf localhost:8090/metrics | grep qbittorrent_app_version")
-      '';
+      exporterTest = # python
+        ''
+          wait_for_unit("qbittorrent.service")
+          wait_for_unit("prometheus-qbittorrent-exporter.service")
+          wait_for_open_port(8088)
+          wait_for_open_port(8091)
+          succeed("curl -sSf localhost:8091/metrics | grep qbittorrent_app_version")
+        '';
     };
 
     redis = {
