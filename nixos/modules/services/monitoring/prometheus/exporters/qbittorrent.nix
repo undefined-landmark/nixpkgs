@@ -38,7 +38,7 @@ in
       type = nullOr str;
       default = "admin";
       description = ''
-        User to connect to qbittorrent server.
+        qBittorrent username.
       '';
     };
 
@@ -49,23 +49,17 @@ in
         All available environment variables can be found in the
         [README.md](https://github.com/martabal/qbittorrent-exporter?tab=readme-ov-file#environment-variables).
 
-        Use the option `environmentFile` for sensitive variables, such as
-        `QBITTORRENT_PASSWORD`.
+        Use the option `passwordFile` to set the qBittorrent password.
       '';
       example = {
         ENABLE_TRACKER = "true";
       };
     };
 
-    environmentFile = mkOption {
-      type = path;
+    passwordFile = mkOption {
+      type = nullOr path;
       description = ''
-        Environment file as defined in {manpage}`systemd.exec(5)`.
-
-        The file should contain at least the variable `QBITTORRENT_PASSWORD`.
-
-        All available environment variables can be found in the
-        [README.md](https://github.com/martabal/qbittorrent-exporter?tab=readme-ov-file#environment-variables).
+        Path to a file containing the qBittorrent password.
       '';
     };
   };
@@ -73,12 +67,13 @@ in
   serviceOpts = {
     serviceConfig = {
       ExecStart = getExe cfg.package;
-      EnvironmentFile = cfg.environmentFile;
+      LoadCredential = "qbitPass:${cfg.passwordFile}";
     };
     environment = {
       EXPORTER_PORT = toString cfg.port;
       QBITTORRENT_USERNAME = cfg.user;
       QBITTORRENT_BASE_URL = cfg.url;
+      QBITTORRENT_PASSWORD_FILE = "\${CREDENTIAL_DIRECTORY}/qbitPass";
     }
     // cfg.environment;
   }

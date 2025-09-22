@@ -1400,9 +1400,7 @@ let
           ENABLE_TRACKER = "false";
         };
         # Don't do this in practice, it will put the password in the nix store.
-        environmentFile = pkgs.writeText "qbit.env" ''
-          QBITTORRENT_PASSWORD=adminadmin
-        '';
+        passwordFile = pkgs.writeText "qbit.env" "adminadmin";
       };
       metricProvider = {
         services.qbittorrent = {
