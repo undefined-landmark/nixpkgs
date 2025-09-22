@@ -73,7 +73,7 @@ in
       EXPORTER_PORT = toString cfg.port;
       QBITTORRENT_USERNAME = cfg.user;
       QBITTORRENT_BASE_URL = cfg.url;
-      QBITTORRENT_PASSWORD_FILE = "\${CREDENTIAL_DIRECTORY}/qbitPass";
+      QBITTORRENT_PASSWORD_FILE = "%d/qbitPass";
     }
     // cfg.environment;
   }
