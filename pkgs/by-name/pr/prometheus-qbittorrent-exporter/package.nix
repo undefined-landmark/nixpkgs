@@ -2,6 +2,7 @@
   lib,
   buildGoModule,
   fetchFromGitHub,
+  nixosTests
 }:
 
 buildGoModule rec {
@@ -31,6 +32,10 @@ buildGoModule rec {
   postInstall = ''
     mv $out/bin/qbit-exp $out/bin/prometheus-qbittorrent-exporter
   '';
+
+  passthru = {
+    tests.testService = nixosTests.prometheus-exporters.qbittorrent;
+  };
 
   meta = {
     description = "A fast and lightweight prometheus exporter for qBittorrent";
