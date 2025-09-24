@@ -7,22 +7,18 @@
 
 buildGoModule rec {
   pname = "prometheus-qbittorrent-exporter";
-  version = "1.11.0-FILE";
+  version = "1.12.0";
 
   src = fetchFromGitHub {
     owner = "martabal";
     repo = "qbittorrent-exporter";
-    rev = "d6aef64118278b6b4aa0b200359c3bc2f772f8f3";
-    hash = "sha256-I9qq9GsN8RPI8qVLetb71AtO49j2dVA+Kpp7INTWJSU=";
+    tag = "v${version}";
+    hash = "";
   };
-
-  postPatch = ''
-    substituteInPlace go.mod --replace-fail 'go 1.25.1' 'go 1.25'
-  '';
 
   sourceRoot = "${src.name}/src";
 
-  vendorHash = "sha256-jJmhRnjioeTq9Uol0lYLChPi4O1D9JnGqN7q1XK36yE=";
+  vendorHash = "";
 
   ldflags = [
     "-s"
