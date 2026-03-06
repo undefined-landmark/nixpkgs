@@ -1,7 +1,6 @@
 {
   lib,
   fetchFromGitHub,
-  ffmpeg-headless,
   flac,
   lame,
   mp3val,
@@ -10,7 +9,6 @@
 }:
 let
   runtimeDeps = [
-    ffmpeg-headless
     flac
     lame
     mp3val
@@ -19,14 +17,14 @@ let
 in
 python3Packages.buildPythonApplication (finalAttrs: {
   pname = "smoked-salmon";
-  version = "0.9.7.4";
+  version = "0.10.0";
   pyproject = true;
 
   src = fetchFromGitHub {
     owner = "smokin-salmon";
     repo = "smoked-salmon";
     tag = finalAttrs.version;
-    hash = "sha256-JOwqu/Hu7BjYLo3DdL6o+9TI/OQvlgj5Xu8WQ0cujwo=";
+    hash = "sha256-v1FzBZAH6+1Dj2J5MNfVzfWYV+jCtWRVcbb95yOGPyA=";
   };
 
   # Upstream tends to use very narrow version constraints
@@ -37,38 +35,41 @@ python3Packages.buildPythonApplication (finalAttrs: {
     setuptools-scm
   ];
 
-  dependencies = with python3Packages; [
-    aiohttp
-    aiohttp-jinja2
-    beautifulsoup4
-    bitstring
-    click
-    deluge-client
-    ffmpeg-python
-    filetype
-    httpx
-    humanfriendly
-    jinja2
-    msgspec
-    musicbrainzngs
-    mutagen
-    pillow
-    platformdirs
-    pycambia
-    pyoxipng
-    pyperclip
-    qbittorrent-api
-    ratelimit
-    requests
-    rich
-    send2trash
-    setuptools
-    torf
-    tqdm
-    transmission-rpc
-    unidecode
-    wheel
-  ];
+  dependencies =
+    with python3Packages;
+    [
+      aiohttp
+      aiohttp-jinja2
+      aiolimiter
+      anyio
+      asyncclick
+      av
+      beautifulsoup4
+      deluge-client
+      humanfriendly
+      jinja2
+      msgspec
+      musicbrainzngs
+      mutagen
+      numpy
+      pillow
+      platformdirs
+      pycambia
+      pyimgbox
+      pyoxipng
+      pyperclip
+      qbittorrent-api
+      requests
+      send2trash
+      tenacity
+      torf
+      tqdm
+      transmission-rpc
+      unidecode
+    ]
+    ++ aiohttp.optional-dependencies.speedups
+    ++ beautifulsoup4.optional-dependencies.lxml
+    ++ msgspec.optional-dependencies.toml;
 
   makeWrapperArgs = [
     "--suffix"
@@ -82,7 +83,7 @@ python3Packages.buildPythonApplication (finalAttrs: {
   };
 
   meta = {
-    description = "Toolkit for checking, editing and uploading music to Gazelle-based trackers";
+    description = "Toolkit for checking, editing and uploading music. Catered to Gazelle-based trackers";
     homepage = "https://github.com/smokin-salmon/smoked-salmon";
     license = with lib.licenses; [ asl20 ];
     mainProgram = "salmon";
