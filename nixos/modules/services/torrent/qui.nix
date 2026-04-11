@@ -110,60 +110,68 @@ in
       }
     ];
 
-    systemd.services.qui = {
-      description = "qui: alternative qBittorrent webUI";
-      after = [ "network-online.target" ];
-      wants = [ "network-online.target" ];
-      wantedBy = [ "multi-user.target" ];
+    systemd = {
+      tmpfiles.settings = {
+        "10-qui" = {
+          "${stateDir}/config.toml"."L+" = {
+            argument = "${configFile}";
+          };
+        };
+      };
 
-      serviceConfig = {
-        Type = "simple";
-        User = cfg.user;
-        Group = cfg.group;
+      services.qui = {
+        description = "qui: alternative qBittorrent webUI";
+        after = [ "network-online.target" ];
+        wants = [ "network-online.target" ];
+        wantedBy = [ "multi-user.target" ];
+        restartTriggers = [ configFile ];
 
-        LoadCredential = "sessionSecret:${cfg.secretFile}";
-        Environment = [ "QUI__SESSION_SECRET_FILE=%d/sessionSecret" ];
-        StateDirectory = "qui";
+        serviceConfig = {
+          Type = "simple";
+          User = cfg.user;
+          Group = cfg.group;
 
-        ExecStartPre = ''
-          ${pkgs.coreutils}/bin/install -m 600 '${configFile}' '%S/qui/config.toml'
-        '';
-        ExecStart = "${getExe cfg.package} serve --config-dir %S/qui";
-        Restart = "on-failure";
+          LoadCredential = "sessionSecret:${cfg.secretFile}";
+          Environment = [ "QUI__SESSION_SECRET_FILE=%d/sessionSecret" ];
+          StateDirectory = "qui";
 
-        # Based on qbittorrent and nemorosa hardening settings
-        # Similar to what systemd hardening helper suggests
-        CapabilityBoundingSet = "";
-        LockPersonality = true;
-        MemoryDenyWriteExecute = true;
-        NoNewPrivileges = true;
-        PrivateDevices = true;
-        PrivateNetwork = false;
-        PrivateTmp = true;
-        PrivateUsers = true;
-        ProcSubset = "pid";
-        ProtectClock = true;
-        ProtectControlGroups = true;
-        ProtectHome = "yes";
-        ProtectHostname = true;
-        ProtectKernelLogs = true;
-        ProtectKernelModules = true;
-        ProtectKernelTunables = true;
-        ProtectProc = "invisible";
-        # This should allow for hardlinking to torrent client files
-        ProtectSystem = "full";
-        RemoveIPC = true;
-        RestrictAddressFamilies = [
-          "AF_INET"
-          "AF_INET6"
-          "AF_NETLINK"
-          "AF_UNIX"
-        ];
-        RestrictNamespaces = true;
-        RestrictRealtime = true;
-        RestrictSUIDSGID = true;
-        SystemCallArchitectures = "native";
-        SystemCallFilter = [ "@system-service" ];
+          ExecStart = "${getExe cfg.package} serve --config-dir %S/qui";
+          Restart = "on-failure";
+
+          # Based on qbittorrent and nemorosa hardening settings
+          # Similar to what systemd hardening helper suggests
+          CapabilityBoundingSet = "";
+          LockPersonality = true;
+          MemoryDenyWriteExecute = true;
+          NoNewPrivileges = true;
+          PrivateDevices = true;
+          PrivateNetwork = false;
+          PrivateTmp = true;
+          PrivateUsers = true;
+          ProcSubset = "pid";
+          ProtectClock = true;
+          ProtectControlGroups = true;
+          ProtectHome = "yes";
+          ProtectHostname = true;
+          ProtectKernelLogs = true;
+          ProtectKernelModules = true;
+          ProtectKernelTunables = true;
+          ProtectProc = "invisible";
+          # This should allow for hardlinking to torrent client files
+          ProtectSystem = "full";
+          RemoveIPC = true;
+          RestrictAddressFamilies = [
+            "AF_INET"
+            "AF_INET6"
+            "AF_NETLINK"
+            "AF_UNIX"
+          ];
+          RestrictNamespaces = true;
+          RestrictRealtime = true;
+          RestrictSUIDSGID = true;
+          SystemCallArchitectures = "native";
+          SystemCallFilter = [ "@system-service" ];
+        };
       };
     };
 
