@@ -133,9 +133,8 @@ in
     };
 
     configFile = mkOption {
-      type = path;
-      default = generatedConfigFile;
-      defaultText = literalExpression "config file generated from the serverConfig option";
+      type = nullOr path;
+      default = null;
       description = ''
         Path to a {file}`qBittorrent.conf` file to use instead of the one generated from the {option}`services.qbittorrent.serverConfig` option.
         Note that this configuration file cannot be strictly enforced, since it needs to be writable by qBittorrent.
@@ -156,7 +155,7 @@ in
   config = mkIf cfg.enable {
     assertions = [
       {
-        assertion = !(options.services.qbittorrent.configFile.isDefined && cfg.serverConfig != { });
+        assertion = !(cfg.configFile != null && cfg.serverConfig != { });
         message = "Can not set both services.qbittorrent.serverConfig and services.qbittorrent.configFile";
       }
     ];
@@ -184,10 +183,8 @@ in
         ];
         wantedBy = [ "multi-user.target" ];
         restartTriggers =
-          optionals (cfg.serverConfig != { } || options.services.qbittorrent.configFile.isDefined)
-            [
-              cfg.configFile
-            ];
+          optionals (cfg.serverConfig != { }) [ generatedConfigFile ]
+          ++ optionals (cfg.configFile != null) [ cfg.configFile ];
 
         serviceConfig = {
           Type = "simple";
@@ -195,11 +192,11 @@ in
           Group = cfg.group;
 
           # the config file has to be writable, so we have to do this weird dance
-          ExecStartPre =
-            lib.mkIf (cfg.serverConfig != { } || options.services.qbittorrent.configFile.isDefined)
-              ''
-                ${pkgs.coreutils}/bin/install -Dm600 ${cfg.configFile} "${cfg.profileDir}/qBittorrent/config/qBittorrent.conf"
-              '';
+          ExecStartPre = lib.mkIf (cfg.serverConfig != { } || cfg.configFile != null) ''
+            ${pkgs.coreutils}/bin/install -Dm600 ${
+              if cfg.serverConfig != { } then generatedConfigFile else cfg.configFile
+            } "${cfg.profileDir}/qBittorrent/config/qBittorrent.conf"
+          '';
 
           ExecStart = utils.escapeSystemdExecArgs (
             [
